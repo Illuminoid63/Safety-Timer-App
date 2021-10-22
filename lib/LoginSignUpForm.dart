@@ -1,5 +1,7 @@
 import "package:flutter/material.dart";
 import "package:firebase_auth/firebase_auth.dart";
+import "package:cloud_firestore/cloud_firestore.dart";
+import "emergencyDependee.dart";
 import "Dashboard.dart";
 
 class LoginSignUpForm extends StatefulWidget {
@@ -19,21 +21,27 @@ class _LoginSignUpFormState extends State<LoginSignUpForm> {
         padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
         child: Column(
           children: [
-            Text("Log into your account",
-                style: TextStyle(
-                    fontSize: 25.0,
-                    fontStyle: FontStyle.italic,
-                    fontWeight: FontWeight.bold)),
-            TextFormField(
-              autofocus: true,
-              onChanged: (newText) {
-                setState(() {
-                  _loginEmail = newText;
-                });
-              },
-              decoration: InputDecoration(
-                border: UnderlineInputBorder(),
-                labelText: "Email",
+            Padding(
+              padding: EdgeInsets.symmetric(vertical: 10),
+              child: Text("Log into your account",
+                  style: TextStyle(
+                      fontSize: 25.0,
+                      fontStyle: FontStyle.italic,
+                      fontWeight: FontWeight.bold)),
+            ),
+            Padding(
+              padding: EdgeInsets.only(bottom: 10),
+              child: TextFormField(
+                autofocus: true,
+                onChanged: (newText) {
+                  setState(() {
+                    _loginEmail = newText;
+                  });
+                },
+                decoration: InputDecoration(
+                  border: UnderlineInputBorder(),
+                  labelText: "Email",
+                ),
               ),
             ),
             TextFormField(
@@ -48,25 +56,29 @@ class _LoginSignUpFormState extends State<LoginSignUpForm> {
                 labelText: "Password",
               ),
             ),
-            ElevatedButton(
-              onPressed: () async {
-                try {
-                  UserCredential userCredential = await FirebaseAuth.instance
-                      .signInWithEmailAndPassword(
-                          email: _loginEmail, password: _loginPassword);
-                  Navigator.pushReplacement(context,
-                      MaterialPageRoute(builder: (context) => Dashboard()));
-                } on FirebaseAuthException catch (e) {
-                  if (e.code == "user-not-found") {
-                    _errorMessage = "No user found for that email.";
-                  } else if (e.code == "wrong-password") {
-                    _errorMessage = "Wrong password provided for that user.";
+            Padding(
+              padding: EdgeInsets.only(top: 20, bottom: 10),
+              child: ElevatedButton(
+                onPressed: () async {
+                  try {
+                    UserCredential userCredential = await FirebaseAuth.instance
+                        .signInWithEmailAndPassword(
+                            email: _loginEmail, password: _loginPassword);
+                    Navigator.pushReplacement(context,
+                        MaterialPageRoute(builder: (context) => Dashboard()));
+                  } on FirebaseAuthException catch (e) {
+                    if (e.code == "user-not-found") {
+                      _errorMessage = "No user found for that email.";
+                    } else if (e.code == "wrong-password") {
+                      _errorMessage = "Wrong password provided for that user.";
+                    }
+                    setState(() {});
                   }
-                }
-              },
-              child: Container(
-                  padding: EdgeInsets.symmetric(horizontal: 40),
-                  child: Text("Log in")),
+                },
+                child: Container(
+                    padding: EdgeInsets.symmetric(horizontal: 40),
+                    child: Text("Log in")),
+              ),
             ),
             Text(_errorMessage, style: TextStyle(color: Colors.red)),
           ],
@@ -78,21 +90,30 @@ class _LoginSignUpFormState extends State<LoginSignUpForm> {
         padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
         child: Column(
           children: [
-            Text("Your Security is our Priority!",
+            Padding(
+              padding: EdgeInsets.symmetric(vertical: 10),
+              child: Text(
+                "Create your *TBD* account today",
                 style: TextStyle(
                     fontSize: 25.0,
                     fontStyle: FontStyle.italic,
-                    fontWeight: FontWeight.bold)),
-            TextFormField(
-              autofocus: true,
-              onChanged: (newText) {
-                setState(() {
-                  _newUserEmail = newText;
-                });
-              },
-              decoration: InputDecoration(
-                border: UnderlineInputBorder(),
-                labelText: "New Account Email",
+                    fontWeight: FontWeight.bold),
+                textAlign: TextAlign.center,
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.only(bottom: 10),
+              child: TextFormField(
+                autofocus: true,
+                onChanged: (newText) {
+                  setState(() {
+                    _newUserEmail = newText;
+                  });
+                },
+                decoration: InputDecoration(
+                  border: UnderlineInputBorder(),
+                  labelText: "New Account Email",
+                ),
               ),
             ),
             TextFormField(
@@ -107,35 +128,45 @@ class _LoginSignUpFormState extends State<LoginSignUpForm> {
                 labelText: "New Account Password",
               ),
             ),
-            ElevatedButton(
-              onPressed: () async {
-                try {
-                  UserCredential userCredential = await FirebaseAuth.instance
-                      .createUserWithEmailAndPassword(
-                          email: _newUserEmail, password: _newUserPassword);
-                  /*
-                    ToDo:
-                      - when a new user is created, add a new document to the actual firstore database with the document id 
-                        being the auth's uid(userCredential.user.uid).
-                      - also set the document's email field with the entered email, any problems should prolly be caught by the try catch block
-                  */
-                  Navigator.pushReplacement(context,
-                      MaterialPageRoute(builder: (context) => Dashboard()));
-                } on FirebaseAuthException catch (e) {
-                  if (e.code == "weak-password") {
-                    _errorMessage = "The password provided is too weak.";
-                  } else if (e.code == "email-already-in-use") {
-                    _errorMessage =
-                        "The account already exists for that email.";
+            Padding(
+              padding: EdgeInsets.only(top: 20, bottom: 10),
+              child: ElevatedButton(
+                onPressed: () async {
+                  try {
+                    UserCredential userCredential = await FirebaseAuth.instance
+                        .createUserWithEmailAndPassword(
+                            email: _newUserEmail, password: _newUserPassword);
+
+                    FirebaseFirestore firestore = FirebaseFirestore.instance;
+                    var user = firestore.collection("users");
+                    List<EmergencyDependee> dependees = [];
+                    List<double> gpsData = [];
+
+                    await user.doc(userCredential.user.uid).set({
+                      "email": _newUserEmail,
+                      "emergency dependees":
+                          dependees.map((item) => item.toJson()).toList(),
+                      "GPS Data": gpsData
+                    });
+
+                    Navigator.pushReplacement(context,
+                        MaterialPageRoute(builder: (context) => Dashboard()));
+                  } on FirebaseAuthException catch (e) {
+                    if (e.code == "weak-password") {
+                      _errorMessage = "The password provided is too weak.";
+                    } else if (e.code == "email-already-in-use") {
+                      _errorMessage =
+                          "The account already exists for that email.";
+                    }
+                    setState(() {});
+                  } catch (e) {
+                    print(e);
                   }
-                  setState(() {});
-                } catch (e) {
-                  print(e);
-                }
-              },
-              child: Container(
-                  padding: EdgeInsets.symmetric(horizontal: 40),
-                  child: Text("Sign up")),
+                },
+                child: Container(
+                    padding: EdgeInsets.symmetric(horizontal: 40),
+                    child: Text("Sign up")),
+              ),
             ),
             Text(_errorMessage, style: TextStyle(color: Colors.red)),
           ],

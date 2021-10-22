@@ -89,7 +89,8 @@ class _DashboardState extends State<Dashboard> {
                                 emergencyDependee.add(currentDependee);
                               }
                               return ListTile(
-                                leading: Icon(Icons.perm_identity),
+                                leading: Icon(Icons.person),
+                                trailing: Icon(Icons.chevron_right),
                                 title: Text(emergencyDependee[index].nickName),
                                 isThreeLine: true,
                                 subtitle: Text("${emergencyDependee[index].email}"),
@@ -106,7 +107,7 @@ class _DashboardState extends State<Dashboard> {
       floatingActionButton: FloatingActionButton(
         onPressed: () {},
         tooltip: 'Increment',
-        child: Icon(Icons.add),
+        child: Icon(Icons.person_add),
         backgroundColor: Colors.purple,
       ),
     );
