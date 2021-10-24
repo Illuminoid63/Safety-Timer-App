@@ -44,3 +44,9 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+#firebase keys
+android/app/google-services.json
+
+#other api key and sensitive data globals
+lib/SensitiveGlobals.dart
