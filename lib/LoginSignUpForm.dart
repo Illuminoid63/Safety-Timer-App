@@ -1,6 +1,7 @@
 import "package:flutter/material.dart";
 import "package:firebase_auth/firebase_auth.dart";
 import "package:cloud_firestore/cloud_firestore.dart";
+import 'package:flutter/services.dart';
 import "emergencyDependee.dart";
 import "Dashboard.dart";
 
@@ -24,10 +25,7 @@ class _LoginSignUpFormState extends State<LoginSignUpForm> {
             Padding(
               padding: EdgeInsets.symmetric(vertical: 10),
               child: Text("Log into your account",
-                  style: TextStyle(
-                      fontSize: 25.0,
-                      fontStyle: FontStyle.italic,
-                      fontWeight: FontWeight.bold)),
+                  style: Theme.of(context).textTheme.headline5),
             ),
             Padding(
               padding: EdgeInsets.only(bottom: 10),
@@ -94,10 +92,7 @@ class _LoginSignUpFormState extends State<LoginSignUpForm> {
               padding: EdgeInsets.symmetric(vertical: 10),
               child: Text(
                 "Create your *TBD* account today",
-                style: TextStyle(
-                    fontSize: 25.0,
-                    fontStyle: FontStyle.italic,
-                    fontWeight: FontWeight.bold),
+                style: Theme.of(context).textTheme.headline5,
                 textAlign: TextAlign.center,
               ),
             ),
@@ -186,6 +181,8 @@ class _LoginSignUpFormState extends State<LoginSignUpForm> {
             ],
           ),
           title: Text("Safety Timer App"),
+          centerTitle: true,
+          
         ),
         body: TabBarView(
           children: [createLoginWidgets(), createSignupWidgets()],
