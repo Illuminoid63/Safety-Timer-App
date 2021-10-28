@@ -1,7 +1,6 @@
 import "package:flutter/material.dart";
 import "package:firebase_auth/firebase_auth.dart";
 import "package:cloud_firestore/cloud_firestore.dart";
-import 'package:flutter/services.dart';
 import "emergencyDependee.dart";
 import "Dashboard.dart";
 
@@ -151,11 +150,12 @@ class _LoginSignUpFormState extends State<LoginSignUpForm> {
                       _errorMessage = "The password provided is too weak.";
                     } else if (e.code == "email-already-in-use") {
                       _errorMessage =
-                          "The account already exists for that email.";
+                          "An account already exists for that email.";
                     }
                     setState(() {});
                   } catch (e) {
                     print(e);
+                    print("test");
                   }
                 },
                 child: Container(

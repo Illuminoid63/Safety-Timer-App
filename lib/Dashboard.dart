@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import "package:firebase_core/firebase_core.dart";
 import "package:cloud_firestore/cloud_firestore.dart";
 import "package:firebase_auth/firebase_auth.dart";
 import "emergencyDependee.dart";
 import "LoginSignUpForm.dart";
+import "TimerRoute.dart";
+import 'package:duration_picker/duration_picker.dart';
 
 class Dashboard extends StatefulWidget {
   Dashboard({Key key}) : super(key: key);
@@ -21,7 +22,8 @@ class _DashboardState extends State<Dashboard> {
     load();
   }
 
-  load() async { //might not need this if I am using stream builder
+  load() async {
+    //might not need this if I am using stream builder
     emergencyDependees.clear();
     FirebaseFirestore firestore = FirebaseFirestore.instance;
     FirebaseAuth auth = FirebaseAuth.instance;
@@ -105,7 +107,12 @@ class _DashboardState extends State<Dashboard> {
           ),
           actions: [
             IconButton(
-              onPressed: () {}, //im thinking gps granularity and light/dark theme, or no settings at all its kinda an all or nothing thing here
+              onPressed: () {
+                //im thinking gps granularity and light/dark theme, or no settings at all its kinda an all or nothing thing here
+                //also clear cached gps data button with snackbar
+                //also delete account with alert dialog/box making sure they want to delete
+                //if they can delete their account then need to add error checking when an emergency contact tries to look at their data but their account (i.e. their document has been deleted)
+              },
               icon: Icon(Icons.settings),
               tooltip: "Settings",
             )
@@ -248,21 +255,40 @@ class _DashboardState extends State<Dashboard> {
           ),
         ),
         floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-        floatingActionButton:
-          Padding(padding: EdgeInsets.symmetric(horizontal: 15), child:
-            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-          FloatingActionButton(
-            onPressed: () {},
-            tooltip: 'Add an Emergency Timer',
-            child: Icon(Icons.alarm_add),
-            heroTag: null,
-          ),
-          FloatingActionButton(
-            onPressed: () {},
-            tooltip: 'Add an Emergency Contact',
-            child: Icon(Icons.person_add),
-            heroTag: null,
-          )
-        ])));
+        floatingActionButton: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 15),
+            child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  FloatingActionButton(
+                    onPressed: () async {
+                      var duration = await showDurationPicker(
+                          context: context,
+                          initialTime: Duration(minutes: 0),
+                          decoration: BoxDecoration(
+                              shape: BoxShape.rectangle,
+                              color: Theme.of(context).scaffoldBackgroundColor,
+                              borderRadius: BorderRadius.circular(20)));
+
+                      if (duration != null) {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => TimerRoute(duration)));
+                      } else {
+                        //they didnt pick a timer
+                      }
+                    },
+                    tooltip: 'Add an Emergency Timer',
+                    child: Icon(Icons.alarm_add),
+                    heroTag: null,
+                  ),
+                  FloatingActionButton(
+                    onPressed: () {},
+                    tooltip: 'Add an Emergency Contact',
+                    child: Icon(Icons.person_add),
+                    heroTag: null,
+                  )
+                ])));
   }
 }
