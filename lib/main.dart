@@ -3,10 +3,13 @@ import "package:firebase_core/firebase_core.dart";
 import "package:firebase_auth/firebase_auth.dart";
 import "LoginSignUpForm.dart";
 import "Dashboard.dart";
+import 'Notifcation_service.dart';
 
-void main() async {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
+  await NotificationService().init();
+  await Firebase.initializeApp(); 
+  
 
   runApp(MyApp());
 }
@@ -17,11 +20,12 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
-          primarySwatch: Colors.purple,
-          brightness: Brightness.dark,
-          floatingActionButtonTheme: FloatingActionButtonThemeData(
-              foregroundColor: Colors.white, backgroundColor: Colors.purple),
-          accentColor: Colors.purple,),
+        primarySwatch: Colors.purple,
+        brightness: Brightness.dark,
+        floatingActionButtonTheme: FloatingActionButtonThemeData(
+            foregroundColor: Colors.white, backgroundColor: Colors.purple),
+        accentColor: Colors.purple,
+      ),
       themeMode: ThemeMode.system,
       debugShowCheckedModeBanner: false,
       home: MyHomePage(),

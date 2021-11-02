@@ -3,8 +3,7 @@ import "package:cloud_firestore/cloud_firestore.dart";
 import "package:firebase_auth/firebase_auth.dart";
 import "emergencyDependee.dart";
 import "LoginSignUpForm.dart";
-import "TimerRoute.dart";
-import 'package:duration_picker/duration_picker.dart';
+import 'DurationPicker.dart';
 
 class Dashboard extends StatefulWidget {
   Dashboard({Key key}) : super(key: key);
@@ -14,29 +13,6 @@ class Dashboard extends StatefulWidget {
 }
 
 class _DashboardState extends State<Dashboard> {
-  List<EmergencyDependee> emergencyDependees = [];
-
-  @override
-  void initState() {
-    super.initState();
-    load();
-  }
-
-  load() async {
-    //might not need this if I am using stream builder
-    emergencyDependees.clear();
-    FirebaseFirestore firestore = FirebaseFirestore.instance;
-    FirebaseAuth auth = FirebaseAuth.instance;
-    var snapshot =
-        await firestore.collection("users").doc(auth.currentUser.uid).get();
-    for (var dependee in snapshot.data()["emergency dependees"]) {
-      var currentDependee =
-          EmergencyDependee(dependee["nickname"], dependee["email"]);
-      emergencyDependees.add(currentDependee);
-    }
-    setState(() {});
-  }
-
   Widget createNickNameSetterWidget(String email, String oldNickName) {
     String _newNickname = "";
     return Padding(
@@ -240,7 +216,7 @@ class _DashboardState extends State<Dashboard> {
                                             //see gps data button and then
                                             Padding(
                                                 padding:
-                                                    EdgeInsets.only(top: 10),
+                                                    EdgeInsets.only(top: 15, bottom: 15),
                                                 child: ElevatedButton(
                                                     onPressed: () {},
                                                     child: Text("GPS Data"))),
@@ -261,23 +237,8 @@ class _DashboardState extends State<Dashboard> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   FloatingActionButton(
-                    onPressed: () async {
-                      var duration = await showDurationPicker(
-                          context: context,
-                          initialTime: Duration(minutes: 0),
-                          decoration: BoxDecoration(
-                              shape: BoxShape.rectangle,
-                              color: Theme.of(context).scaffoldBackgroundColor,
-                              borderRadius: BorderRadius.circular(20)));
-
-                      if (duration != null) {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => TimerRoute(duration)));
-                      } else {
-                        //they didnt pick a timer
-                      }
+                    onPressed: () {
+                      pickDuration(context); //in DurationPicker.dart, I felt it was too big and cluttering this file too much
                     },
                     tooltip: 'Add an Emergency Timer',
                     child: Icon(Icons.alarm_add),
