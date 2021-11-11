@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
-import 'Notifcation_service.dart';
+import 'Services/Notifcation_service.dart';
 
 class TimerRoute extends StatefulWidget {
   final Duration timerDuration;
@@ -81,7 +81,7 @@ class _TimerRoutestate extends State<TimerRoute> {
         automaticallyImplyLeading: false,
       ),
       body: Center(
-          child: SingleChildScrollView(
+        child: SingleChildScrollView(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [

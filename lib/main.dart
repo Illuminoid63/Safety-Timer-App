@@ -3,7 +3,7 @@ import "package:firebase_core/firebase_core.dart";
 import "package:firebase_auth/firebase_auth.dart";
 import "LoginSignUpForm.dart";
 import "Dashboard.dart";
-import 'Notifcation_service.dart';
+import 'Services/Notifcation_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,7 +18,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Safety Timer App',
       theme: ThemeData(
         primarySwatch: Colors.purple,
         brightness: Brightness.dark,
@@ -27,7 +27,7 @@ class MyApp extends StatelessWidget {
         accentColor: Colors.purple,
       ),
       themeMode: ThemeMode.system,
-      debugShowCheckedModeBanner: false,
+      debugShowCheckedModeBanner: true,//change to false when during final demo
       home: MyHomePage(),
     );
   }

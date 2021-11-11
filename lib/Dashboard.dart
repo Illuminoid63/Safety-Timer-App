@@ -1,9 +1,14 @@
+import 'package:capstone/EmergencyEventTriggered.dart';
 import 'package:flutter/material.dart';
 import "package:cloud_firestore/cloud_firestore.dart";
 import "package:firebase_auth/firebase_auth.dart";
-import "emergencyDependee.dart";
+import 'Models/emergencyDependee.dart';
 import "LoginSignUpForm.dart";
 import 'DurationPicker.dart';
+import 'TimerRoute.dart';
+import 'package:location/location.dart';
+
+//consider refactoring all database logic into singleton class (similar to Notification_service)
 
 class Dashboard extends StatefulWidget {
   Dashboard({Key key}) : super(key: key);
@@ -13,6 +18,7 @@ class Dashboard extends StatefulWidget {
 }
 
 class _DashboardState extends State<Dashboard> {
+
   Widget createNickNameSetterWidget(String email, String oldNickName) {
     String _newNickname = "";
     return Padding(
@@ -39,7 +45,8 @@ class _DashboardState extends State<Dashboard> {
                 FirebaseFirestore firestore = FirebaseFirestore.instance;
                 FirebaseAuth auth = FirebaseAuth.instance;
 
-                //this runs the following updates in a transaction, meaning in a single atomic step, so that we don't need a loading screen
+                //this runs the following updates in a transaction, meaning in a single atomic step, 
+                //so that we don't need a loading screen
                 await firestore.runTransaction((transaction) async {
                   var user =
                       firestore.collection("users").doc(auth.currentUser.uid);
@@ -54,7 +61,7 @@ class _DashboardState extends State<Dashboard> {
                       {"nickname": _newNickname, "email": email}
                     ])
                   });
-                }, timeout: Duration(seconds: 10));
+                });
               },
               child: Text("Set"))
         ],
@@ -88,6 +95,7 @@ class _DashboardState extends State<Dashboard> {
                 //also clear cached gps data button with snackbar
                 //also delete account with alert dialog/box making sure they want to delete
                 //if they can delete their account then need to add error checking when an emergency contact tries to look at their data but their account (i.e. their document has been deleted)
+                //setting for when timer notification goes off
               },
               icon: Icon(Icons.settings),
               tooltip: "Settings",
@@ -100,9 +108,21 @@ class _DashboardState extends State<Dashboard> {
             children: <Widget>[
               Padding(
                 child: ElevatedButton(
-                  onPressed: () {
-                    //panic button trigger
-                    print("panic");
+                  onPressed: () async {
+                    askLocationPermission();
+                    if (await Location.instance.hasPermission() !=
+                        PermissionStatus.granted) {
+                      //probably an alert dialog
+                      debugPrint(
+                          "display some error message saying they have to enable location permission");
+                    } else {
+                      //push emergency route
+                      Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) =>
+                                    EmergencyEventTrigger()));
+                    }
                   },
                   child: Padding(
                     child: Text(
@@ -215,8 +235,8 @@ class _DashboardState extends State<Dashboard> {
                                           children: [
                                             //see gps data button and then
                                             Padding(
-                                                padding:
-                                                    EdgeInsets.only(top: 15, bottom: 15),
+                                                padding: EdgeInsets.only(
+                                                    top: 15, bottom: 15),
                                                 child: ElevatedButton(
                                                     onPressed: () {},
                                                     child: Text("GPS Data"))),
@@ -237,15 +257,26 @@ class _DashboardState extends State<Dashboard> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   FloatingActionButton(
-                    onPressed: () {
-                      pickDuration(context); //in DurationPicker.dart, I felt it was too big and cluttering this file too much
+                    onPressed: () async {
+                      Duration timerDuration = await pickDuration(
+                          context); //in DurationPicker.dart, I felt it was too big and cluttering this file too much
+                      if (timerDuration != null) {
+                        //this is required if user hits cancel, because then nothing is returned
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) =>
+                                    TimerRoute(timerDuration)));
+                      }
                     },
                     tooltip: 'Add an Emergency Timer',
                     child: Icon(Icons.alarm_add),
                     heroTag: null,
                   ),
                   FloatingActionButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      //auth.fetchSignInMethodsForEmail(email), checks if a email exists, returns empty list if it does not and throws exception if input is invalid
+                    },
                     tooltip: 'Add an Emergency Contact',
                     child: Icon(Icons.person_add),
                     heroTag: null,
