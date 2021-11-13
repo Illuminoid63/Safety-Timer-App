@@ -75,9 +75,8 @@ class _LoginSignUpFormState extends State<LoginSignUpForm> {
                         } else if (e.code == "wrong-password") {
                           _errorMessage =
                               "Wrong password provided for that user.";
-                        } else if(e.code == "invalid-email"){
-                          _errorMessage =
-                              "Invalid email";
+                        } else if (e.code == "invalid-email") {
+                          _errorMessage = "Invalid email";
                         }
                         setState(() {});
                       }
@@ -207,31 +206,37 @@ class _LoginSignUpFormState extends State<LoginSignUpForm> {
   }
 }
 
-  void askLocationPermission() async{
-    Location location = new Location();
+void askLocationPermission() async {
+  Location location = new Location();
 
-    bool _serviceEnabled;
-    bool _backgroundGranted;
-    PermissionStatus _permissionGranted;
+  bool _serviceEnabled;
+  PermissionStatus _permissionGranted;
 
-    _serviceEnabled = await location.serviceEnabled();
+  _serviceEnabled = await location.serviceEnabled();
+  if (!_serviceEnabled) {
+    _serviceEnabled = await location.requestService();
     if (!_serviceEnabled) {
-      _serviceEnabled = await location.requestService();
-      if (!_serviceEnabled) {
-        return;
-      }
-    }
-
-    _permissionGranted = await location.hasPermission();
-    if (_permissionGranted == PermissionStatus.denied) {
-      _permissionGranted = await location.requestPermission();
-      if (_permissionGranted != PermissionStatus.granted) {
-        return;
-      }
-    }
-
-    _backgroundGranted = await location.enableBackgroundMode();
-    if(!_backgroundGranted){
-      //add dialog here i think or in the equivalent in permissions below
+      return;
     }
   }
+
+  _permissionGranted = await location.hasPermission();
+  if (_permissionGranted == PermissionStatus.denied) {
+    _permissionGranted = await location.requestPermission();
+    if (_permissionGranted != PermissionStatus.granted) {
+      return;
+    }
+  }
+  bool backgroundLocation;
+  try {
+    backgroundLocation = await location.enableBackgroundMode();
+    if (!backgroundLocation) {
+      //add dialog here i think or in the equivalent in permissions below
+      print("background denied");
+    }
+  } catch (e) {
+    //same dialog
+    //set bool to false then check bool when calling, if false then show dialog notifying that they should enable in backround
+    //make function return bool, will probably have to be a future bool that we await on
+  }
+}
