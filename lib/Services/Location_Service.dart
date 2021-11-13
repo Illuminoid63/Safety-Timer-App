@@ -17,6 +17,7 @@ class LocationService {
     location.requestPermission().then((granted) {
       if (granted == PermissionStatus.granted) {
         // If granted listen to the onLocationChanged stream and emit over our controller
+        location.changeSettings(interval: 5000); //5 seconds
         location.onLocationChanged.listen((locationData) {
           if (locationData != null) {
             _locationController.add(UserLocation(

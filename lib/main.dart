@@ -27,7 +27,7 @@ class MyApp extends StatelessWidget {
         accentColor: Colors.purple,
       ),
       themeMode: ThemeMode.system,
-      debugShowCheckedModeBanner: true,//change to false when during final demo
+      debugShowCheckedModeBanner: false,//change to false when during final demo
       home: MyHomePage(),
     );
   }

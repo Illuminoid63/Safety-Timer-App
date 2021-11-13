@@ -211,6 +211,7 @@ class _LoginSignUpFormState extends State<LoginSignUpForm> {
     Location location = new Location();
 
     bool _serviceEnabled;
+    bool _backgroundGranted;
     PermissionStatus _permissionGranted;
 
     _serviceEnabled = await location.serviceEnabled();
@@ -227,5 +228,10 @@ class _LoginSignUpFormState extends State<LoginSignUpForm> {
       if (_permissionGranted != PermissionStatus.granted) {
         return;
       }
+    }
+
+    _backgroundGranted = await location.enableBackgroundMode();
+    if(!_backgroundGranted){
+      //add dialog here i think or in the equivalent in permissions below
     }
   }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'Services/Notifcation_service.dart';
+import 'package:capstone/EmergencyEventTriggered.dart';
 
 class TimerRoute extends StatefulWidget {
   final Duration timerDuration;
@@ -32,13 +33,19 @@ class _TimerRoutestate extends State<TimerRoute> {
       });
       if (currentTimeLeft.inSeconds == 0) {
         //trigger emergency event
+
+        //navigation cant be pushed while app isnt open, instead implement own uploading here and try to pass bool to 
+        //route telling it to not call load , that way I can differentiate panic button from timer
+        //either that or have load be a global function and the stream it modifies a global stream
+
+        print("timer fired");
+        Navigator.push(context,
+            MaterialPageRoute(builder: (context) => EmergencyEventTrigger()));
         timer.cancel();
       }
       if (currentTimeLeft.inSeconds == (5 * 60) &&
           widget.timerDuration.inMinutes >= 6) {
         //maybe ad functionality to set when reminder goes off in setting route
-        //notify that timer will go off in 5 minutes
-
         NotificationService().showNotifications(timerNotificationID);
       }
     });
@@ -81,7 +88,7 @@ class _TimerRoutestate extends State<TimerRoute> {
         automaticallyImplyLeading: false,
       ),
       body: Center(
-        child: SingleChildScrollView(
+          child: SingleChildScrollView(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
