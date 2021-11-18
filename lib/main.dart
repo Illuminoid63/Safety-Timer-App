@@ -10,7 +10,6 @@ Future<void> main() async {
   await NotificationService().init();
   await Firebase.initializeApp(); 
   
-
   runApp(MyApp());
 }
 

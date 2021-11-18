@@ -35,7 +35,7 @@ class _TimerRoutestate extends State<TimerRoute> {
         //trigger emergency event
 
         //navigation cant be pushed while app isnt open, instead implement own uploading here and try to pass bool to 
-        //route telling it to not call load , that way I can differentiate panic button from timer
+        //route telling it to not call load , that way I can differentiate between panic button from timer
         //either that or have load be a global function and the stream it modifies a global stream
 
         print("timer fired");

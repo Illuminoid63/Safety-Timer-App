@@ -3,7 +3,7 @@ import "package:firebase_auth/firebase_auth.dart";
 import "package:cloud_firestore/cloud_firestore.dart";
 import 'Models/emergencyDependee.dart';
 import "Dashboard.dart";
-import 'package:location/location.dart';
+import "Services/Location_Service.dart";
 
 class LoginSignUpForm extends StatefulWidget {
   @override
@@ -203,40 +203,5 @@ class _LoginSignUpFormState extends State<LoginSignUpForm> {
         ),
       ),
     );
-  }
-}
-
-void askLocationPermission() async {
-  Location location = new Location();
-
-  bool _serviceEnabled;
-  PermissionStatus _permissionGranted;
-
-  _serviceEnabled = await location.serviceEnabled();
-  if (!_serviceEnabled) {
-    _serviceEnabled = await location.requestService();
-    if (!_serviceEnabled) {
-      return;
-    }
-  }
-
-  _permissionGranted = await location.hasPermission();
-  if (_permissionGranted == PermissionStatus.denied) {
-    _permissionGranted = await location.requestPermission();
-    if (_permissionGranted != PermissionStatus.granted) {
-      return;
-    }
-  }
-  bool backgroundLocation;
-  try {
-    backgroundLocation = await location.enableBackgroundMode();
-    if (!backgroundLocation) {
-      //add dialog here i think or in the equivalent in permissions below
-      print("background denied");
-    }
-  } catch (e) {
-    //same dialog
-    //set bool to false then check bool when calling, if false then show dialog notifying that they should enable in backround
-    //make function return bool, will probably have to be a future bool that we await on
   }
 }

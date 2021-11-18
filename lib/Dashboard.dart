@@ -6,7 +6,7 @@ import 'Models/emergencyDependee.dart';
 import "LoginSignUpForm.dart";
 import 'DurationPicker.dart';
 import 'TimerRoute.dart';
-import 'package:location/location.dart';
+import "Services/Location_Service.dart";
 
 //consider refactoring all database logic into singleton class (similar to Notification_service)
 
@@ -18,7 +18,6 @@ class Dashboard extends StatefulWidget {
 }
 
 class _DashboardState extends State<Dashboard> {
-
   Widget createNickNameSetterWidget(String email, String oldNickName) {
     String _newNickname = "";
     return Padding(
@@ -45,7 +44,7 @@ class _DashboardState extends State<Dashboard> {
                 FirebaseFirestore firestore = FirebaseFirestore.instance;
                 FirebaseAuth auth = FirebaseAuth.instance;
 
-                //this runs the following updates in a transaction, meaning in a single atomic step, 
+                //this runs the following updates in a transaction, meaning in a single atomic step,
                 //so that we don't need a loading screen
                 await firestore.runTransaction((transaction) async {
                   var user =
@@ -109,19 +108,18 @@ class _DashboardState extends State<Dashboard> {
               Padding(
                 child: ElevatedButton(
                   onPressed: () async {
-                    askLocationPermission();
-                    if (await Location.instance.hasPermission() !=
-                        PermissionStatus.granted) {
-                      //probably an alert dialog
-                      debugPrint(
-                          "display some error message saying they have to enable location permission");
+                    int permissionReturn = await askLocationPermission();
+                    if (permissionReturn == 1) { //true if user denied any location permissions
+                      await _deniedLocationServiceDialog();
                     } else {
+                      if (permissionReturn == 2) { //true if user denied background location permissions specifically, app gps uploading still works, but not as well
+                        await _deniedBackgroundLocationServiceDialog();
+                      }
                       //push emergency route
                       Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) =>
-                                    EmergencyEventTrigger()));
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => EmergencyEventTrigger()));
                     }
                   },
                   child: Padding(
@@ -258,15 +256,24 @@ class _DashboardState extends State<Dashboard> {
                 children: [
                   FloatingActionButton(
                     onPressed: () async {
-                      Duration timerDuration = await pickDuration(
-                          context); //in DurationPicker.dart, I felt it was too big and cluttering this file too much
-                      if (timerDuration != null) {
-                        //this is required if user hits cancel, because then nothing is returned
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) =>
-                                    TimerRoute(timerDuration)));
+                      int permissionReturn = await askLocationPermission();
+                      if (permissionReturn == 1) { //true if user denied all location permissions, thus gps uploading impossible
+                        //probably an alert dialog
+                        await _deniedLocationServiceDialog();
+                      } else {
+                        if (permissionReturn == 2) { //true if user denied specifically background location permissions, still possible but does work as well
+                          await _deniedBackgroundLocationServiceDialog();
+                        }
+                        Duration timerDuration = await pickDuration(
+                            context); //in DurationPicker.dart, I felt it was too big and cluttering this file too much
+                        if (timerDuration != null) {
+                          //this is required if user hits cancel, because then nothing is returned
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) =>
+                                      TimerRoute(timerDuration)));
+                        }
                       }
                     },
                     tooltip: 'Add an Emergency Timer',
@@ -282,5 +289,47 @@ class _DashboardState extends State<Dashboard> {
                     heroTag: null,
                   )
                 ])));
+  }
+
+  Future<void> _deniedLocationServiceDialog() async {
+    await showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+              title: Text("Enable Location Service"),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(30))),
+              content: Text(
+                  "Location permission is required for the panic button and emergency timer to work."),
+              actions: [
+                TextButton(
+                  child: Text(
+                    "OK",
+                    style: TextStyle(fontSize: 17, color: Colors.purple[400]),
+                  ),
+                  onPressed: () => Navigator.of(context).pop(),
+                )
+              ],
+            ));
+  }
+
+  Future<void> _deniedBackgroundLocationServiceDialog() async {
+    await showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+              title: Text("Enable Backgorund Location Service"),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(30))),
+              content: Text(
+                  "It is highly reccomended to allow location permission all the time for this app to work as intended."),
+              actions: [
+                TextButton(
+                  child: Text(
+                    "OK",
+                    style: TextStyle(fontSize: 17, color: Colors.purple[400]),
+                  ),
+                  onPressed: () => Navigator.of(context).pop(),
+                )
+              ],
+            ));
   }
 }
