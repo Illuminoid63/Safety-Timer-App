@@ -109,17 +109,20 @@ class _DashboardState extends State<Dashboard> {
                 child: ElevatedButton(
                   onPressed: () async {
                     int permissionReturn = await askLocationPermission();
-                    if (permissionReturn == 1) { //true if user denied any location permissions
+                    if (permissionReturn == 1) {
+                      //true if user denied any location permissions
                       await _deniedLocationServiceDialog();
                     } else {
-                      if (permissionReturn == 2) { //true if user denied background location permissions specifically, app gps uploading still works, but not as well
+                      if (permissionReturn == 2) {
+                        //true if user denied background location permissions specifically, app gps uploading still works, but not as well
                         await _deniedBackgroundLocationServiceDialog();
                       }
                       //push emergency route
                       Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => EmergencyEventTrigger()));
+                              builder: (context) =>
+                                  EmergencyEventTrigger(true)));
                     }
                   },
                   child: Padding(
@@ -257,11 +260,13 @@ class _DashboardState extends State<Dashboard> {
                   FloatingActionButton(
                     onPressed: () async {
                       int permissionReturn = await askLocationPermission();
-                      if (permissionReturn == 1) { //true if user denied all location permissions, thus gps uploading impossible
+                      if (permissionReturn == 1) {
+                        //true if user denied all location permissions, thus gps uploading impossible
                         //probably an alert dialog
                         await _deniedLocationServiceDialog();
                       } else {
-                        if (permissionReturn == 2) { //true if user denied specifically background location permissions, still possible but does work as well
+                        if (permissionReturn == 2) {
+                          //true if user denied specifically background location permissions, still possible but does work as well
                           await _deniedBackgroundLocationServiceDialog();
                         }
                         Duration timerDuration = await pickDuration(
