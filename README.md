@@ -1,6 +1,6 @@
 # Safety Timer App
  
-This is a android mobile application made in Flutter using Firebase cloud store to host data and Firebase Authentication to authenticate users.
+This is an android mobile application made in Flutter using Firebase cloud store to host data and Firebase Authentication to authenticate users.
 
 This is a safety app that is designed to keep users safe by  utilizing various trigger mechanisms that will notify emergency contacts (other users) that something went wrong and then these contacts will be able to view gps data from the user who triggered the notification.
 
