@@ -122,7 +122,7 @@ class _DashboardState extends State<Dashboard> {
                           context,
                           MaterialPageRoute(
                               builder: (context) =>
-                                  EmergencyEventTrigger(true)));
+                                  EmergencyEventTrigger()));
                     }
                   },
                   child: Padding(

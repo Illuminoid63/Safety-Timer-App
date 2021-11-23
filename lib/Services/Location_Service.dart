@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/cupertino.dart';
 import 'package:location/location.dart';
 import '../Models/UserLocation.dart';
 
@@ -39,7 +40,7 @@ class LocationService {
         longitude: userLocation.longitude,
       );
     } on Exception catch (e) {
-      print('Could not get location: ${e.toString()}');
+      debugPrint('Could not get location: ${e.toString()}');
     }
     return _currentLocation;
   }

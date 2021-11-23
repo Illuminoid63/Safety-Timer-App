@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'Services/Notifcation_service.dart';
-import 'package:capstone/EmergencyEventTriggered.dart';
+import 'EmergencyEventTriggered.dart';
 
 class TimerRoute extends StatefulWidget {
   final Duration timerDuration;
@@ -32,12 +32,11 @@ class _TimerRoutestate extends State<TimerRoute> {
         currentTimeLeft -= Duration(seconds: 1);
       });
       if (currentTimeLeft.inSeconds == 0) {
-        print("timer fired");
         loadLocationSubscription();
         Navigator.push(
             context,
             MaterialPageRoute(
-                builder: (context) => EmergencyEventTrigger(false)));
+                builder: (context) => EmergencyEventTrigger()));
         timer.cancel();
       }
       if (currentTimeLeft.inSeconds == (5 * 60) &&
@@ -91,12 +90,12 @@ class _TimerRoutestate extends State<TimerRoute> {
           children: [
             buildTimer(),
             Padding(
-              padding: EdgeInsets.all(50),
+              padding: EdgeInsets.symmetric(vertical:50),
               child: ElevatedButton(
                   onPressed: () {
                     //cancel timer, or check in
                     NotificationService().cancelAllNotifications(
-                        timerNotificationID); //might need to change is we implement more notifications, not sure how this will work with puish notifications later
+                        timerNotificationID); 
                     timer.cancel();
                     Navigator.of(context).popUntil((route) => route.isFirst);
                   },

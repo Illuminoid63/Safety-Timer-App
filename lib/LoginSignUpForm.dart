@@ -77,6 +77,8 @@ class _LoginSignUpFormState extends State<LoginSignUpForm> {
                               "Wrong password provided for that user.";
                         } else if (e.code == "invalid-email") {
                           _errorMessage = "Invalid email";
+                        }else{
+                          _errorMessage = e.message;
                         }
                         setState(() {});
                       }
@@ -166,11 +168,10 @@ class _LoginSignUpFormState extends State<LoginSignUpForm> {
                         } else if (e.code == "email-already-in-use") {
                           _errorMessage =
                               "An account already exists for that email.";
+                        }else {
+                           _errorMessage = e.message;
                         }
                         setState(() {});
-                      } catch (e) {
-                        print(e);
-                        print("test");
                       }
                     },
                     child: Container(

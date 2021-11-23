@@ -6,12 +6,9 @@ import 'Services/Location_Service.dart';
 import "package:cloud_firestore/cloud_firestore.dart";
 import "package:firebase_auth/firebase_auth.dart";
 import 'package:latlong/latlong.dart';
-import 'package:location/location.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class EmergencyEventTrigger extends StatefulWidget {
-  final bool loadOnInit;
-
-  EmergencyEventTrigger([this.loadOnInit]);
 
   @override
   _EmergencyEventTriggerState createState() => _EmergencyEventTriggerState();
@@ -23,8 +20,14 @@ class _EmergencyEventTriggerState extends State<EmergencyEventTrigger> {
   @override
   void initState() {
     super.initState();
-    if (widget.loadOnInit) {
+    if (_locationSubscription == null) {
       loadLocationSubscription();
+    }
+  }
+
+  Future<void> _makePhoneCall(String phoneNum) async {
+    if (await canLaunch(phoneNum)) {
+      await launch(phoneNum);
     }
   }
 
@@ -46,11 +49,18 @@ class _EmergencyEventTriggerState extends State<EmergencyEventTrigger> {
                 textAlign: TextAlign.center,
               ),
               Padding(
-                padding: const EdgeInsets.only(bottom: 80, top: 40),
+                padding: const EdgeInsets.only(bottom: 70, top: 70),
                 child: CircularProgressIndicator(),
               ),
               ElevatedButton(
-                  onPressed: () {
+                  onPressed: () async {
+                    FirebaseFirestore firestore = FirebaseFirestore.instance;
+                    FirebaseAuth auth = FirebaseAuth.instance;
+
+                    _locationSubscription.cancel();
+
+                    await _clearGPSPoints(firestore.collection("users").doc(auth.currentUser.uid), firestore);
+                    
                     Navigator.of(context).popUntil((route) => route.isFirst);
                   },
                   child: Padding(
@@ -59,10 +69,15 @@ class _EmergencyEventTriggerState extends State<EmergencyEventTrigger> {
                       "Cancel",
                       style: Theme.of(context).textTheme.headline5,
                     ),
-                  ))
+                  )),
             ],
           ),
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        child: Icon(Icons.call),
+        onPressed: () => _makePhoneCall('tel:911'),
+        tooltip: "Call 911",
       ),
     );
   }
@@ -71,60 +86,62 @@ class _EmergencyEventTriggerState extends State<EmergencyEventTrigger> {
   void dispose() {
     //also gets called when using OS back button
     super.dispose();
-    _locationSubscription
-        .cancel(); //starting location subscription is required, so call load as a global
-    Location.instance.enableBackgroundMode(
-        enable:
-            false); //cancel backround location after done using it (i.e. on dispose)
+    _locationSubscription.cancel();
   }
 }
 
-void loadLocationSubscription() {
+Future<void> _clearGPSPoints(var user, var firestore) async {
+  await firestore.runTransaction((transaction) async { //clear array on new triggers
+          transaction.update(user, {"GPS Data": FieldValue.delete()});
+          transaction.update(
+              user, {"GPS Data": []});
+        });
+}
+
+void loadLocationSubscription() async {
   FirebaseFirestore firestore = FirebaseFirestore.instance;
   FirebaseAuth auth = FirebaseAuth.instance;
+
   var user = firestore.collection("users").doc(auth.currentUser.uid);
+  await _clearGPSPoints(user, firestore);
+
   _locationSubscription =
       LocationService().locationStream.listen((locationData) async {
     var snapshot = await user.get();
-    var locationList = snapshot.data()["GPS Data"];
+    List<UserLocation> locationList = [];
+    for (var location in snapshot.data()["GPS Data"]) {
+      var currentUserLocation = UserLocation(
+          latitude: location["latitude"].toDouble(),
+          longitude: location["longitude"].toDouble());
+      locationList.add(currentUserLocation);
+    }
     var distance = Distance();
     double distanceBetween = locationList.length > 0 // in meters
         ? distance(
             LatLng(locationData.latitude, locationData.longitude),
-            LatLng(locationList[locationList.length - 1]["latitude"],
-                locationList[locationList.length - 1]["longitude"]))
+            LatLng(locationList[locationList.length - 1].latitude,
+                locationList[locationList.length - 1].longitude))
         : 1000; //if there is nothing uploaded yet, default to large number(in this case 1km) so this new point will be uploaded
     if (distanceBetween >= 30) {
       //throttle uploading, only concerned with new coordinates that are at least 30 meters away from previously uploaded coordinate
       if (locationList.length < 20) {
-        //keeping the array a maximum of 50 entries long to save space in case of user error forgetting to turn off emergency event
-        user.update({
-          "GPS Data": FieldValue.arrayUnion([
-            {
-              "latitude": locationData.latitude,
-              "longitude": locationData.longitude,
-            }
-          ])
+        //keeping the array a maximum of 20 entries long to save space in case of user error forgetting to turn off emergency event
+        locationList.add(locationData);
+        await firestore.runTransaction((transaction) async {
+          var userRef = firestore.collection("users").doc(auth.currentUser.uid);
+          transaction.update(userRef, {"GPS Data": FieldValue.delete()});
+          transaction.update(
+              userRef, {"GPS Data": locationList.map((e) => e.toJson()).toList()});
         });
       } else {
         //delete last index, append new data, delete whole list and then upload whole new list in transaction
+        locationList.removeAt(locationList.length - 1);
+        locationList.add(locationData);
         await firestore.runTransaction((transaction) async {
-          transaction.update(user, {
-            "GPS Data": FieldValue.arrayRemove([
-              {
-                "latitude": locationList[locationList.length - 1]["latitude"],
-                "longitude": locationList[locationList.length - 1]["longitude"],
-              }
-            ])
-          });
-          transaction.update(user, {
-            "GPS Data": FieldValue.arrayUnion([
-              {
-                "latitude": locationData.latitude,
-                "longitude": locationData.longitude,
-              }
-            ])
-          });
+          var userRef = firestore.collection("users").doc(auth.currentUser.uid);
+          transaction.update(userRef, {"GPS Data": FieldValue.delete()});
+          transaction.update(
+              userRef, {"GPS Data": locationList.map((e) => e.toJson()).toList()});
         });
       }
     }
