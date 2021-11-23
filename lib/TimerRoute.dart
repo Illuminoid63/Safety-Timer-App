@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'Services/Notifcation_service.dart';
+import 'EmergencyEventTriggered.dart';
 
 class TimerRoute extends StatefulWidget {
   final Duration timerDuration;
@@ -31,14 +32,16 @@ class _TimerRoutestate extends State<TimerRoute> {
         currentTimeLeft -= Duration(seconds: 1);
       });
       if (currentTimeLeft.inSeconds == 0) {
-        //trigger emergency event
+        loadLocationSubscription();
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => EmergencyEventTrigger()));
         timer.cancel();
       }
       if (currentTimeLeft.inSeconds == (5 * 60) &&
           widget.timerDuration.inMinutes >= 6) {
         //maybe ad functionality to set when reminder goes off in setting route
-        //notify that timer will go off in 5 minutes
-
         NotificationService().showNotifications(timerNotificationID);
       }
     });
@@ -81,18 +84,18 @@ class _TimerRoutestate extends State<TimerRoute> {
         automaticallyImplyLeading: false,
       ),
       body: Center(
-        child: SingleChildScrollView(
+          child: SingleChildScrollView(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             buildTimer(),
             Padding(
-              padding: EdgeInsets.all(50),
+              padding: EdgeInsets.symmetric(vertical:50),
               child: ElevatedButton(
                   onPressed: () {
                     //cancel timer, or check in
                     NotificationService().cancelAllNotifications(
-                        timerNotificationID); //might need to change is we implement more notifications, not sure how this will work with puish notifications later
+                        timerNotificationID); 
                     timer.cancel();
                     Navigator.of(context).popUntil((route) => route.isFirst);
                   },

@@ -3,7 +3,7 @@ import "package:firebase_auth/firebase_auth.dart";
 import "package:cloud_firestore/cloud_firestore.dart";
 import 'Models/emergencyDependee.dart';
 import "Dashboard.dart";
-import 'package:location/location.dart';
+import "Services/Location_Service.dart";
 
 class LoginSignUpForm extends StatefulWidget {
   @override
@@ -75,9 +75,10 @@ class _LoginSignUpFormState extends State<LoginSignUpForm> {
                         } else if (e.code == "wrong-password") {
                           _errorMessage =
                               "Wrong password provided for that user.";
-                        } else if(e.code == "invalid-email"){
-                          _errorMessage =
-                              "Invalid email";
+                        } else if (e.code == "invalid-email") {
+                          _errorMessage = "Invalid email";
+                        }else{
+                          _errorMessage = e.message;
                         }
                         setState(() {});
                       }
@@ -167,11 +168,10 @@ class _LoginSignUpFormState extends State<LoginSignUpForm> {
                         } else if (e.code == "email-already-in-use") {
                           _errorMessage =
                               "An account already exists for that email.";
+                        }else {
+                           _errorMessage = e.message;
                         }
                         setState(() {});
-                      } catch (e) {
-                        print(e);
-                        print("test");
                       }
                     },
                     child: Container(
@@ -206,26 +206,3 @@ class _LoginSignUpFormState extends State<LoginSignUpForm> {
     );
   }
 }
-
-  void askLocationPermission() async{
-    Location location = new Location();
-
-    bool _serviceEnabled;
-    PermissionStatus _permissionGranted;
-
-    _serviceEnabled = await location.serviceEnabled();
-    if (!_serviceEnabled) {
-      _serviceEnabled = await location.requestService();
-      if (!_serviceEnabled) {
-        return;
-      }
-    }
-
-    _permissionGranted = await location.hasPermission();
-    if (_permissionGranted == PermissionStatus.denied) {
-      _permissionGranted = await location.requestPermission();
-      if (_permissionGranted != PermissionStatus.granted) {
-        return;
-      }
-    }
-  }
