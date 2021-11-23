@@ -36,7 +36,7 @@ class _TimerRoutestate extends State<TimerRoute> {
         Navigator.push(
             context,
             MaterialPageRoute(
-                builder: (context) => EmergencyEventTrigger()));
+                builder: (context) => EmergencyEventTrigger(false)));
         timer.cancel();
       }
       if (currentTimeLeft.inSeconds == (5 * 60) &&
