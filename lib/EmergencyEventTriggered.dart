@@ -9,9 +9,9 @@ import 'package:latlong/latlong.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class EmergencyEventTrigger extends StatefulWidget {
-  final bool loadOnInit;
+  final bool _loadOnInit;
 
-  EmergencyEventTrigger([this.loadOnInit]);
+  EmergencyEventTrigger(this._loadOnInit);
 
   @override
   _EmergencyEventTriggerState createState() => _EmergencyEventTriggerState();
@@ -23,7 +23,7 @@ class _EmergencyEventTriggerState extends State<EmergencyEventTrigger> {
   @override
   void initState() {
     super.initState();
-    if (widget.loadOnInit) {
+    if (widget._loadOnInit) {
       loadLocationSubscription();
     }
   }
@@ -87,7 +87,6 @@ class _EmergencyEventTriggerState extends State<EmergencyEventTrigger> {
 
   @override
   void dispose() {
-    //also gets called when using OS back button
     super.dispose();
     _locationSubscription.cancel();
   }

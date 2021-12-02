@@ -1,5 +1,3 @@
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 class NotificationService {
@@ -18,20 +16,13 @@ class NotificationService {
 
   Future<void> init() async {
     const AndroidInitializationSettings initializationSettingsAndroid =
-        AndroidInitializationSettings('@mipmap/ic_launcher');
+        AndroidInitializationSettings('@mipmap/ic_launcher');//default icon for now
 
     final InitializationSettings initializationSettings =
         InitializationSettings(android: initializationSettingsAndroid);
 
-    await flutterLocalNotificationsPlugin.initialize(initializationSettings,
-        onSelectNotification: selectNotification);
+    await flutterLocalNotificationsPlugin.initialize(initializationSettings);
   }
-
-  Future selectNotification(String payload) async {
-    debugPrint("payload: $payload");
-    //this will automatically open the app to the most recently displayed route, which is what we want so no changes here
-  }
-
 
   static const AndroidNotificationDetails _androidNotificationDetails =
       AndroidNotificationDetails(

@@ -13,41 +13,42 @@ class TimerRoute extends StatefulWidget {
 }
 
 class _TimerRoutestate extends State<TimerRoute> {
-  Duration currentTimeLeft;
-  Timer timer;
-  int timerNotificationID = 0;
+  Duration _currentTimeLeft;
+  Timer _timer;
+  int _timerNotificationID = 0;
 
   @override
   void initState() {
     super.initState();
-    currentTimeLeft = widget.timerDuration;
+    _currentTimeLeft = widget.timerDuration;
     startTimer();
   }
 
   void startTimer() {
-    timerNotificationID =
+    _timerNotificationID =
         5; //arbitrary, all related timer notifications will be 5
-    timer = Timer.periodic(Duration(seconds: 1), (timer) {
+    _timer = Timer.periodic(Duration(seconds: 1), (_timer) {
       setState(() {
-        currentTimeLeft -= Duration(seconds: 1);
+        _currentTimeLeft -= Duration(seconds: 1);
       });
-      if (currentTimeLeft.inSeconds == 0) {
+      if (_currentTimeLeft.inSeconds == 0) {
         loadLocationSubscription();
         Navigator.push(
             context,
             MaterialPageRoute(
                 builder: (context) => EmergencyEventTrigger(false)));
-        timer.cancel();
+        _timer.cancel();
       }
-      if (currentTimeLeft.inSeconds == (5 * 60) &&
+      if (_currentTimeLeft.inSeconds == (5 * 60) &&
           widget.timerDuration.inMinutes >= 6) {
-        //maybe ad functionality to set when reminder goes off in setting route
-        NotificationService().showNotifications(timerNotificationID);
+        //maybe add functionality to set when reminder goes off in setting route
+        NotificationService().showNotifications(_timerNotificationID);
       }
     });
   }
 
-  String _printDuration(Duration duration) {
+  String _timerDurationFormat(Duration duration) {
+    //deals the formatting of the time remaining
     String retval = "";
     if (duration.inHours != 0) {
       retval += "${duration.inHours.toString()}:";
@@ -93,10 +94,10 @@ class _TimerRoutestate extends State<TimerRoute> {
               padding: EdgeInsets.symmetric(vertical:50),
               child: ElevatedButton(
                   onPressed: () {
-                    //cancel timer, or check in
+                    //cancel _timer, or check in
                     NotificationService().cancelAllNotifications(
-                        timerNotificationID); 
-                    timer.cancel();
+                        _timerNotificationID); 
+                    _timer.cancel();
                     Navigator.of(context).popUntil((route) => route.isFirst);
                   },
                   child: Padding(
@@ -119,13 +120,13 @@ class _TimerRoutestate extends State<TimerRoute> {
       height: 200,
       child: Stack(fit: StackFit.expand, children: [
         CircularProgressIndicator(
-          value: currentTimeLeft.inSeconds / widget.timerDuration.inSeconds,
+          value: _currentTimeLeft.inSeconds / widget.timerDuration.inSeconds,
           strokeWidth: 10,
           backgroundColor: Colors.grey,
         ),
         Center(
           child: Text(
-            "${_printDuration(currentTimeLeft)}",
+            "${_timerDurationFormat(_currentTimeLeft)}",
             style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold),
           ),
         ),

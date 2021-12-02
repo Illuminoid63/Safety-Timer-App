@@ -12,10 +12,10 @@ class LoginSignUpForm extends StatefulWidget {
 
 class _LoginSignUpFormState extends State<LoginSignUpForm> {
   String _errorMessage = "";
-  String _loginEmail;
-  String _loginPassword;
-  String _newUserEmail;
-  String _newUserPassword;
+  String _loginEmail = "";
+  String _loginPassword = "";
+  String _newUserEmail = "";
+  String _newUserPassword = "";
 
   Widget createLoginWidgets() {
     return SingleChildScrollView(

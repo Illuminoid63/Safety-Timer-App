@@ -1,4 +1,5 @@
-import 'package:capstone/EmergencyEventTriggered.dart';
+import 'AddNewEmergencyContact.dart';
+import 'EmergencyEventTriggered.dart';
 import 'package:flutter/material.dart';
 import "package:cloud_firestore/cloud_firestore.dart";
 import "package:firebase_auth/firebase_auth.dart";
@@ -18,7 +19,8 @@ class Dashboard extends StatefulWidget {
 }
 
 class _DashboardState extends State<Dashboard> {
-  Widget createNickNameSetterWidget(String email, String oldNickName) {
+  Widget createNickNameSetterWidget(
+      String email, String oldNickName, String uid) {
     String _newNickname = "";
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 15),
@@ -52,12 +54,12 @@ class _DashboardState extends State<Dashboard> {
 
                   transaction.update(user, {
                     "emergency dependees": FieldValue.arrayRemove([
-                      {"nickname": oldNickName, "email": email}
+                      {"nickname": oldNickName, "email": email, "uid": uid}
                     ])
                   });
                   transaction.update(user, {
                     "emergency dependees": FieldValue.arrayUnion([
-                      {"nickname": _newNickname, "email": email}
+                      {"nickname": _newNickname, "email": email, "uid": uid}
                     ])
                   });
                 });
@@ -182,7 +184,9 @@ class _DashboardState extends State<Dashboard> {
                                 for (var dependee
                                     in snapshot.data["emergency dependees"]) {
                                   var currentDependee = EmergencyDependee(
-                                      dependee["nickname"], dependee["email"]);
+                                      dependee["nickname"],
+                                      dependee["email"],
+                                      dependee["uid"]);
                                   emergencyDependee.add(currentDependee);
                                 }
                                 return Dismissible(
@@ -212,7 +216,8 @@ class _DashboardState extends State<Dashboard> {
                                             "nickname": emergencyDependee[index]
                                                 .nickName,
                                             "email":
-                                                emergencyDependee[index].email
+                                                emergencyDependee[index].email,
+                                            "uid": emergencyDependee[index].uid
                                           }
                                         ])
                                       });
@@ -229,7 +234,8 @@ class _DashboardState extends State<Dashboard> {
                                       children: [
                                         createNickNameSetterWidget(
                                             emergencyDependee[index].email,
-                                            emergencyDependee[index].nickName),
+                                            emergencyDependee[index].nickName,
+                                            emergencyDependee[index].uid),
                                         Row(
                                           mainAxisAlignment:
                                               MainAxisAlignment.center,
@@ -262,7 +268,6 @@ class _DashboardState extends State<Dashboard> {
                       int permissionReturn = await askLocationPermission();
                       if (permissionReturn == 1) {
                         //true if user denied all location permissions, thus gps uploading impossible
-                        //probably an alert dialog
                         await _deniedLocationServiceDialog();
                       } else {
                         if (permissionReturn == 2) {
@@ -286,8 +291,32 @@ class _DashboardState extends State<Dashboard> {
                     heroTag: null,
                   ),
                   FloatingActionButton(
-                    onPressed: () {
-                      //auth.fetchSignInMethodsForEmail(email), checks if a email exists, returns empty list if it does not and throws exception if input is invalid
+                    onPressed: () async {
+                      var newContact = await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => AddNewEmergencyContact()));
+                      if (newContact != null) {
+                        var insertingEmergencyDependee = EmergencyDependee(
+                            newContact.currentUserDisplayName,
+                            auth.currentUser.email,
+                            auth.currentUser.uid);
+                        await firestore
+                            .collection("users")
+                            .where("email", isEqualTo: newContact.email)
+                            .get()
+                            .then((value) async {
+                          var emergencyContactID = value.docs.first
+                              .id; //should only be one user because emails are unique
+                          var emergencyContact = firestore
+                              .collection("users")
+                              .doc(emergencyContactID);
+                          await emergencyContact.update({
+                            "emergency dependees": FieldValue.arrayUnion(
+                                [insertingEmergencyDependee.toJson()])
+                          });
+                        });
+                      }
                     },
                     tooltip: 'Add an Emergency Contact',
                     child: Icon(Icons.person_add),

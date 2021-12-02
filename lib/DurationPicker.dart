@@ -12,7 +12,7 @@ String _add(String strToAddTo, String additive) {
 
 Widget _digitButtonBuilder(String digit, var updateTimeDurationStr,
     var setState, BuildContext context) {
-  //made this so I didn't have to repeat code below 12 times inside the gridview
+  //made this so I didn't have to repeat code below 12 times inside a gridview
   return RawMaterialButton(
     onPressed: () {
       updateTimeDurationStr(digit, setState);
