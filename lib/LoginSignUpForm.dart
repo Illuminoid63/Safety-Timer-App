@@ -84,7 +84,7 @@ class _LoginSignUpFormState extends State<LoginSignUpForm> {
                       }
                     },
                     child: Container(
-                        padding: EdgeInsets.symmetric(horizontal: 40),
+                        padding: EdgeInsets.symmetric(horizontal: 40, vertical: 10),
                         child: Text("Log in")),
                   ),
                 ),
@@ -175,7 +175,7 @@ class _LoginSignUpFormState extends State<LoginSignUpForm> {
                       }
                     },
                     child: Container(
-                        padding: EdgeInsets.symmetric(horizontal: 40),
+                        padding: EdgeInsets.symmetric(horizontal: 40, vertical: 10),
                         child: Text("Sign up")),
                   ),
                 ),

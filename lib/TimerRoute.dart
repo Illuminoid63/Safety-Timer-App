@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:location/location.dart';
 import 'dart:async';
 import 'Services/Notifcation_service.dart';
 import 'EmergencyEventTriggered.dart';
@@ -40,8 +41,8 @@ class _TimerRoutestate extends State<TimerRoute> {
         _timer.cancel();
       }
       if (_currentTimeLeft.inSeconds == (5 * 60) &&
-          widget.timerDuration.inMinutes >= 6) {
-        //maybe add functionality to set when reminder goes off in setting route
+          widget.timerDuration.inMinutes >= 5) { //TODO: change this back to 6, but keep it 5 for demoing purposes
+        //maybe add functionality to set when reminder goes off in settings route
         NotificationService().showNotifications(_timerNotificationID);
       }
     });
@@ -87,17 +88,17 @@ class _TimerRoutestate extends State<TimerRoute> {
       body: Center(
           child: SingleChildScrollView(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             buildTimer(),
             Padding(
-              padding: EdgeInsets.symmetric(vertical:50),
+              padding: EdgeInsets.only(top: 125),
               child: ElevatedButton(
                   onPressed: () {
                     //cancel _timer, or check in
                     NotificationService().cancelAllNotifications(
                         _timerNotificationID); 
                     _timer.cancel();
+                    Location.instance.enableBackgroundMode(enable: false);
                     Navigator.of(context).popUntil((route) => route.isFirst);
                   },
                   child: Padding(
@@ -115,22 +116,21 @@ class _TimerRoutestate extends State<TimerRoute> {
   }
 
   Widget buildTimer() {
-    return SizedBox(
-      width: 200,
-      height: 200,
-      child: Stack(fit: StackFit.expand, children: [
+    return Stack(children: [
+      Center(child:
+      Transform.scale(scale: 6, child:
         CircularProgressIndicator(
           value: _currentTimeLeft.inSeconds / widget.timerDuration.inSeconds,
-          strokeWidth: 10,
+          strokeWidth: 2,
           backgroundColor: Colors.grey,
-        ),
+        ),),),
         Center(
           child: Text(
             "${_timerDurationFormat(_currentTimeLeft)}",
             style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold),
           ),
         ),
-      ]),
+      ]
     );
   }
 }

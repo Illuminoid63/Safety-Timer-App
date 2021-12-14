@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:location/location.dart';
 import 'Models/UserLocation.dart';
 import 'Services/Location_Service.dart';
 import "package:cloud_firestore/cloud_firestore.dart";
@@ -60,10 +61,12 @@ class _EmergencyEventTriggerState extends State<EmergencyEventTrigger> {
                     FirebaseFirestore firestore = FirebaseFirestore.instance;
                     FirebaseAuth auth = FirebaseAuth.instance;
 
-                    _locationSubscription.cancel();
+                    await _locationSubscription.cancel();
 
-                    await _clearGPSPoints(firestore.collection("users").doc(auth.currentUser.uid), firestore);
-                    
+                    await _clearGPSPoints(
+                        firestore.collection("users").doc(auth.currentUser.uid),
+                        firestore);
+
                     Navigator.of(context).popUntil((route) => route.isFirst);
                   },
                   child: Padding(
@@ -86,18 +89,24 @@ class _EmergencyEventTriggerState extends State<EmergencyEventTrigger> {
   }
 
   @override
-  void dispose() {
+  void dispose() async {
     super.dispose();
-    _locationSubscription.cancel();
+    FirebaseFirestore firestore = FirebaseFirestore.instance;
+    FirebaseAuth auth = FirebaseAuth.instance;
+
+    await _locationSubscription.cancel();
+    await _clearGPSPoints(
+        firestore.collection("users").doc(auth.currentUser.uid), firestore);
+    await Location.instance.enableBackgroundMode(enable: false);
   }
 }
 
 Future<void> _clearGPSPoints(var user, var firestore) async {
-  await firestore.runTransaction((transaction) async { //clear array on new triggers
-          transaction.update(user, {"GPS Data": FieldValue.delete()});
-          transaction.update(
-              user, {"GPS Data": []});
-        });
+  await firestore.runTransaction((transaction) async {
+    //clear array on new triggers
+    transaction.update(user, {"GPS Data": FieldValue.delete()});
+    transaction.update(user, {"GPS Data": []});
+  });
 }
 
 void loadLocationSubscription() async {
@@ -132,8 +141,8 @@ void loadLocationSubscription() async {
         await firestore.runTransaction((transaction) async {
           var userRef = firestore.collection("users").doc(auth.currentUser.uid);
           transaction.update(userRef, {"GPS Data": FieldValue.delete()});
-          transaction.update(
-              userRef, {"GPS Data": locationList.map((e) => e.toJson()).toList()});
+          transaction.update(userRef,
+              {"GPS Data": locationList.map((e) => e.toJson()).toList()});
         });
       } else {
         //delete last index, append new data, delete whole list and then upload whole new list in transaction
@@ -142,8 +151,8 @@ void loadLocationSubscription() async {
         await firestore.runTransaction((transaction) async {
           var userRef = firestore.collection("users").doc(auth.currentUser.uid);
           transaction.update(userRef, {"GPS Data": FieldValue.delete()});
-          transaction.update(
-              userRef, {"GPS Data": locationList.map((e) => e.toJson()).toList()});
+          transaction.update(userRef,
+              {"GPS Data": locationList.map((e) => e.toJson()).toList()});
         });
       }
     }

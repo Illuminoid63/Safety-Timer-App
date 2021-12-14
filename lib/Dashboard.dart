@@ -1,3 +1,5 @@
+import 'package:capstone/GPSPointList.dart';
+import 'package:location/location.dart';
 import 'AddNewEmergencyContact.dart';
 import 'EmergencyEventTriggered.dart';
 import 'package:flutter/material.dart';
@@ -176,19 +178,19 @@ class _DashboardState extends State<Dashboard> {
                                           Theme.of(context).textTheme.headline4,
                                       textAlign: TextAlign.center)));
                         } else {
+                          List<EmergencyDependee> emergencyDependee = [];
+                          for (var dependee
+                              in snapshot.data["emergency dependees"]) {
+                            var currentDependee = EmergencyDependee(
+                                dependee["nickname"],
+                                dependee["email"],
+                                dependee["uid"]);
+                            emergencyDependee.add(currentDependee);
+                          }
                           return ListView.builder(
                               itemCount:
                                   snapshot.data["emergency dependees"].length,
                               itemBuilder: (context, index) {
-                                List<EmergencyDependee> emergencyDependee = [];
-                                for (var dependee
-                                    in snapshot.data["emergency dependees"]) {
-                                  var currentDependee = EmergencyDependee(
-                                      dependee["nickname"],
-                                      dependee["email"],
-                                      dependee["uid"]);
-                                  emergencyDependee.add(currentDependee);
-                                }
                                 return Dismissible(
                                     key: UniqueKey(),
                                     background: Container(
@@ -240,12 +242,22 @@ class _DashboardState extends State<Dashboard> {
                                           mainAxisAlignment:
                                               MainAxisAlignment.center,
                                           children: [
-                                            //see gps data button and then
                                             Padding(
                                                 padding: EdgeInsets.only(
                                                     top: 15, bottom: 15),
                                                 child: ElevatedButton(
-                                                    onPressed: () {},
+                                                    onPressed: () {
+                                                      Navigator.push(
+                                                          context,
+                                                          MaterialPageRoute(
+                                                              builder: (context) => GPSPointList(
+                                                                  emergencyDependee[
+                                                                          index]
+                                                                      .uid,
+                                                                  emergencyDependee[
+                                                                          index]
+                                                                      .nickName)));
+                                                    },
                                                     child: Text("GPS Data"))),
                                           ],
                                         )
@@ -276,7 +288,11 @@ class _DashboardState extends State<Dashboard> {
                         }
                         Duration timerDuration = await pickDuration(
                             context); //in DurationPicker.dart, I felt it was too big and cluttering this file too much
-                        if (timerDuration != null) {
+                        if(timerDuration == null){
+                          //disable background service if we dont start timer
+                          Location.instance.enableBackgroundMode(enable: false);
+                        }
+                        else{
                           //this is required if user hits cancel, because then nothing is returned
                           Navigator.push(
                               context,
