@@ -41,7 +41,7 @@ class _TimerRoutestate extends State<TimerRoute> {
         _timer.cancel();
       }
       if (_currentTimeLeft.inSeconds == (5 * 60) &&
-          widget.timerDuration.inMinutes >= 5) { //TODO: change this back to 6, but keep it 5 for demoing purposes
+          widget.timerDuration.inMinutes >= 6) {
         //maybe add functionality to set when reminder goes off in settings route
         NotificationService().showNotifications(_timerNotificationID);
       }

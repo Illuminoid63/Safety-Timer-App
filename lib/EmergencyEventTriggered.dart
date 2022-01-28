@@ -8,6 +8,8 @@ import "package:cloud_firestore/cloud_firestore.dart";
 import "package:firebase_auth/firebase_auth.dart";
 import 'package:latlong/latlong.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:twilio_flutter/twilio_flutter.dart';
+import "SensitiveGlobals.dart";
 
 class EmergencyEventTrigger extends StatefulWidget {
   final bool _loadOnInit;
@@ -116,6 +118,35 @@ void loadLocationSubscription() async {
   var user = firestore.collection("users").doc(auth.currentUser.uid);
   await _clearGPSPoints(user, firestore);
 
+  //notify emergency contacts of emergency event through sms
+  List<String> phoneNumberList = [];
+  var userSnapshot = await user.get();
+  for (var currentContactID in userSnapshot.data()["emergency contacts"]) {
+    var currentContactSnapshot =
+        await firestore.collection("users").doc(currentContactID).get();
+    phoneNumberList.add(currentContactSnapshot.data()["phoneNumber"]);
+  }
+
+  TwilioFlutter twilioFlutter;
+  twilioFlutter = TwilioFlutter(
+      accountSid: TwilioSID,
+      authToken: TwilioAuthToken,
+      twilioNumber: TwilioPhoneNumber);
+  for (var phoneNumber in phoneNumberList) {
+    if(phoneNumber != "none"){
+    try {
+      await twilioFlutter.sendSMS(
+          toNumber: phoneNumber,
+          messageBody: 'Safety Timer App: user ' +
+              userSnapshot.data()["email"] +
+              " has triggered an emergency event.");
+    } on Exception catch (e) {
+      print("Twilio " + e.toString());
+    }
+    }
+  }
+
+  //uploading gps points
   _locationSubscription =
       LocationService().locationStream.listen((locationData) async {
     var snapshot = await user.get();

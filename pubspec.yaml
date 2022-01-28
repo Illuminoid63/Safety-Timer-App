@@ -32,6 +32,7 @@ dependencies:
   location: ^4.2.0
   latlong: ^0.6.1
   url_launcher: ^6.0.13
+  twilio_flutter: ^0.0.9
 
 
   # The following adds the Cupertino Icons font to your application.

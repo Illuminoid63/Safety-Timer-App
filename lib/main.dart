@@ -8,10 +8,11 @@ import 'Services/Notifcation_service.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await NotificationService().init();
-  await Firebase.initializeApp(); 
-  
+  await Firebase.initializeApp();
+
   runApp(MyApp());
 }
+
 
 class MyApp extends StatelessWidget {
   @override

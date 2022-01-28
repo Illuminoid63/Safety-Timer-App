@@ -10,6 +10,7 @@ import "LoginSignUpForm.dart";
 import 'DurationPicker.dart';
 import 'TimerRoute.dart';
 import "Services/Location_Service.dart";
+import "Settings.dart" as mySettings;
 
 //consider refactoring all database logic into singleton class (similar to Notification_service)
 
@@ -94,11 +95,18 @@ class _DashboardState extends State<Dashboard> {
           actions: [
             IconButton(
               onPressed: () {
+                Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) =>
+                                  mySettings.Settings()));
+
                 //im thinking gps granularity and light/dark theme, or no settings at all its kinda an all or nothing thing here
                 //also clear cached gps data button with snackbar
                 //also delete account with alert dialog/box making sure they want to delete
                 //if they can delete their account then need to add error checking when an emergency contact tries to look at their data but their account (i.e. their document has been deleted)
                 //setting for when timer notification goes off
+                //form to change phone number and even button to turn off/on recieving text notifications (turning it off will change phone num string in database to none)
               },
               icon: Icon(Icons.settings),
               tooltip: "Settings",
@@ -288,11 +296,10 @@ class _DashboardState extends State<Dashboard> {
                         }
                         Duration timerDuration = await pickDuration(
                             context); //in DurationPicker.dart, I felt it was too big and cluttering this file too much
-                        if(timerDuration == null){
+                        if (timerDuration == null) {
                           //disable background service if we dont start timer
                           Location.instance.enableBackgroundMode(enable: false);
-                        }
-                        else{
+                        } else {
                           //this is required if user hits cancel, because then nothing is returned
                           Navigator.push(
                               context,
@@ -327,9 +334,22 @@ class _DashboardState extends State<Dashboard> {
                           var emergencyContact = firestore
                               .collection("users")
                               .doc(emergencyContactID);
-                          await emergencyContact.update({
-                            "emergency dependees": FieldValue.arrayUnion(
-                                [insertingEmergencyDependee.toJson()])
+
+                          await firestore.runTransaction((transaction) async {
+                            //adding current user to emergency contact's dependee list
+                            transaction.update(emergencyContact, {
+                              "emergency dependees": FieldValue.arrayUnion(
+                                  [insertingEmergencyDependee.toJson()])
+                            });
+
+                            //adding emergency contact's uid to current user's contacts list
+                            var currentUser = firestore
+                                .collection("users")
+                                .doc(auth.currentUser.uid);
+                            transaction.update(currentUser, {
+                              "emergency contacts": FieldValue.arrayUnion(
+                                  [value.docs.first.id])
+                            });
                           });
                         });
                       }
