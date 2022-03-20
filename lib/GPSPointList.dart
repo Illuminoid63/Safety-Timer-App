@@ -80,11 +80,8 @@ class _GPSPointListState extends State<GPSPointList> {
                     return ListTile(
                       leading: Icon(Icons.location_on, color: Colors.purple,),
                       title: Text(
-                          "Latitude: ${locationList[index].latitude.toString()}"),
-                      subtitle: Text(
-                        "Longitude: ${locationList[index].longitude.toString()}",
-                        style: TextStyle(color: Colors.white, fontSize: 16),
-                      ),
+                          "Latitude: ${locationList[index].latitude.toString()}\nLongitude: ${locationList[index].longitude.toString()}",
+                          ),
                       trailing: Icon(Icons.arrow_forward,),
                       onTap: () => _openPointInMaps(locationList[index])
                     );

@@ -75,7 +75,7 @@ class _EmergencyEventTriggerState extends State<EmergencyEventTrigger> {
                     padding: const EdgeInsets.all(10.0),
                     child: Text(
                       "Cancel",
-                      style: Theme.of(context).textTheme.headline5,
+                      style: TextStyle(fontSize: 24, fontWeight: FontWeight.normal, letterSpacing: 0.0),
                     ),
                   )),
             ],

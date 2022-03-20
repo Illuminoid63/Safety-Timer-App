@@ -28,7 +28,7 @@ Widget _digitButtonBuilder(String digit, var updateTimeDurationStr,
   );
 }
 
-Future<Duration> pickDuration(BuildContext context) {
+Future<Duration> pickDuration(BuildContext context, String title) {
   String timeDurationStr = "000000";
   String errorText = "";
 
@@ -47,7 +47,7 @@ Future<Duration> pickDuration(BuildContext context) {
           builder: (context, setState) => AlertDialog(
             shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.all(Radius.circular(30))),
-            title: Text("Enter Timer Duration"),
+            title: Text(title),
             content: SingleChildScrollView(
                 child: Column(mainAxisSize: MainAxisSize.min, children: [
               Padding(
@@ -209,7 +209,7 @@ Future<Duration> pickDuration(BuildContext context) {
                       seconds: durationInSeconds);
                   if (timerDuration.inSeconds == 0 || timerDuration == null) {
                     setState(() {
-                      errorText = "Timer can't be 0 seconds";
+                      errorText = "Can't be 0 seconds";
                     });
                   } else {
                     Navigator.of(context).pop(timerDuration);
@@ -221,3 +221,32 @@ Future<Duration> pickDuration(BuildContext context) {
         );
       });
 }
+
+String timerDurationFormat(Duration duration) {
+    //deals the formatting of the time remaining
+    String retval = "";
+    if (duration.inHours != 0) {
+      retval += "${duration.inHours.toString()}:";
+    }
+    if (duration.inMinutes != 0 || duration.inHours != 0) {
+      int remainder = duration.inMinutes.remainder(60);
+      if (remainder == 0) {
+        retval += "00:";
+      } else if (remainder < 10 && duration.inHours != 0) {
+        retval += "0${duration.inMinutes.remainder(60)}:";
+      } else {
+        retval += "${duration.inMinutes.remainder(60)}:";
+      }
+    }
+    int remainder = duration.inSeconds.remainder(60);
+    if (remainder == 0 && (duration.inMinutes != 0 || duration.inHours != 0)) {
+      retval += "00";
+    } else if (remainder < 10 &&
+        (duration.inMinutes != 0 || duration.inHours != 0)) {
+      retval += "0${duration.inSeconds.remainder(60)}";
+    } else {
+      retval += "${duration.inSeconds.remainder(60)}";
+    }
+
+    return retval;
+  }

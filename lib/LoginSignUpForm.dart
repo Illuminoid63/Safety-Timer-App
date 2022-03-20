@@ -35,6 +35,7 @@ class _LoginSignUpFormState extends State<LoginSignUpForm> {
                 Padding(
                   padding: EdgeInsets.only(bottom: 10),
                   child: TextFormField(
+                    keyboardType: TextInputType.emailAddress,
                     autofocus: true,
                     onChanged: (newText) {
                       setState(() {
@@ -119,6 +120,7 @@ class _LoginSignUpFormState extends State<LoginSignUpForm> {
                 Padding(
                   padding: EdgeInsets.only(bottom: 10),
                   child: TextFormField(
+                    keyboardType: TextInputType.emailAddress,
                     autofocus: true,
                     onChanged: (newText) {
                       setState(() {
@@ -148,6 +150,8 @@ class _LoginSignUpFormState extends State<LoginSignUpForm> {
                 ),
                 _showPhoneNumberForm
                     ? TextFormField(
+                        maxLength: 15,
+                        keyboardType: TextInputType.phone,
                         onChanged: (newText) {
                           setState(() {
                             _newUserPhoneNumber = newText;
@@ -155,7 +159,7 @@ class _LoginSignUpFormState extends State<LoginSignUpForm> {
                         },
                         decoration: InputDecoration(
                             border: UnderlineInputBorder(),
-                            labelText: "New Account Phone Number"),
+                            labelText: "New Account Phone Number with Country Code"),
                       )
                     : Container(),
                 Padding(
@@ -176,10 +180,9 @@ class _LoginSignUpFormState extends State<LoginSignUpForm> {
                     onPressed: () async {
                       if (_showPhoneNumberForm &&
                           _newUserPhoneNumber.length <= 10) {
-                          print(_newUserPhoneNumber.length);
                         setState(() {
                           _errorMessage =
-                              "Either deselect the send text notification button, or ensure that the phone number entered is correct (requires country code)";
+                              "Either deselect the send text message notification button, or ensure that the phone number entered is correct (requires country code)";
                         });
                         return;
                       }

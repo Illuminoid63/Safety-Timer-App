@@ -96,17 +96,16 @@ class _DashboardState extends State<Dashboard> {
             IconButton(
               onPressed: () {
                 Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) =>
-                                  mySettings.Settings()));
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => mySettings.Settings()));
 
-                //im thinking gps granularity and light/dark theme, or no settings at all its kinda an all or nothing thing here
-                //also clear cached gps data button with snackbar
+                //im thinking gps granularity maybe displayed to the user as data usage so its easier for them to understand
+                  //this would be a slider between low medium and high with high gps usage having high granularity
+                //setting to toggle between clear gps cache on cancel vs on new event
+                  //store previous gps points between emergency events
                 //also delete account with alert dialog/box making sure they want to delete
-                //if they can delete their account then need to add error checking when an emergency contact tries to look at their data but their account (i.e. their document has been deleted)
-                //setting for when timer notification goes off
-                //form to change phone number and even button to turn off/on recieving text notifications (turning it off will change phone num string in database to none)
+                  //if they can delete their account then need to add error checking when an emergency contact tries to look at their data but their account is deleted (i.e. their document has been deleted)
               },
               icon: Icon(Icons.settings),
               tooltip: "Settings",
@@ -140,7 +139,10 @@ class _DashboardState extends State<Dashboard> {
                   child: Padding(
                     child: Text(
                       "PANIC",
-                      style: Theme.of(context).textTheme.headline5,
+                      style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.normal,
+                          letterSpacing: 0.0),
                     ),
                     padding: EdgeInsets.symmetric(vertical: 10, horizontal: 30),
                   ),
@@ -219,22 +221,33 @@ class _DashboardState extends State<Dashboard> {
                                       ),
                                     ),
                                     onDismissed: (direction) async {
-                                      await user.update({
-                                        "emergency dependees":
-                                            FieldValue.arrayRemove([
-                                          {
-                                            "nickname": emergencyDependee[index]
-                                                .nickName,
-                                            "email":
-                                                emergencyDependee[index].email,
-                                            "uid": emergencyDependee[index].uid
-                                          }
-                                        ])
+                                      var deletedUser = firestore
+                                          .collection("users")
+                                          .doc(emergencyDependee[index].uid);
+                                      await firestore
+                                          .runTransaction((transaction) async {
+                                        transaction.update(user, {
+                                          "emergency dependees":
+                                              FieldValue.arrayRemove([
+                                            {
+                                              "nickname":
+                                                  emergencyDependee[index]
+                                                      .nickName,
+                                              "email": emergencyDependee[index]
+                                                  .email,
+                                              "uid":
+                                                  emergencyDependee[index].uid
+                                            }
+                                          ])
+                                        });
+                                        transaction.update(deletedUser, {
+                                          "emergency contacts":
+                                              FieldValue.arrayRemove(
+                                                  [auth.currentUser.uid])
+                                        });
                                       });
                                     },
                                     child: ExpansionTile(
-                                      iconColor: Colors.white,
-                                      textColor: Colors.white,
                                       leading: Icon(Icons.person),
                                       title: Text(
                                           emergencyDependee[index].nickName),
@@ -295,7 +308,7 @@ class _DashboardState extends State<Dashboard> {
                           await _deniedBackgroundLocationServiceDialog();
                         }
                         Duration timerDuration = await pickDuration(
-                            context); //in DurationPicker.dart, I felt it was too big and cluttering this file too much
+                            context, "Enter Timer Duration"); //in DurationPicker.dart, I felt it was too big and cluttering this file too much
                         if (timerDuration == null) {
                           //disable background service if we dont start timer
                           Location.instance.enableBackgroundMode(enable: false);
@@ -347,8 +360,8 @@ class _DashboardState extends State<Dashboard> {
                                 .collection("users")
                                 .doc(auth.currentUser.uid);
                             transaction.update(currentUser, {
-                              "emergency contacts": FieldValue.arrayUnion(
-                                  [value.docs.first.id])
+                              "emergency contacts":
+                                  FieldValue.arrayUnion([value.docs.first.id])
                             });
                           });
                         });

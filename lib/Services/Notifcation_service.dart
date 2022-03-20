@@ -1,4 +1,5 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:capstone/DurationPicker.dart';
 
 class NotificationService {
   //singleton pattern
@@ -38,10 +39,10 @@ class NotificationService {
   NotificationDetails(
     android: _androidNotificationDetails); //this is an android only app, so it isnt't initialized for ios or mac
 
-  Future<void> showNotifications(int id) async {
+  Future<void> showNotifications(int id, Duration whenTimerExpires) async {
     await flutterLocalNotificationsPlugin.show(
       id,
-      'Emergency Timer expires in 5 minutes.',
+      'Emergency Timer expires in ${timerDurationFormat(whenTimerExpires)}.',
       'Remeber to check in before the timer expires.',
       platformChannelSpecifics,
       payload: 'Notification Payload',

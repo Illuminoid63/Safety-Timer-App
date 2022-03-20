@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:location/location.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:async';
 import 'Services/Notifcation_service.dart';
 import 'EmergencyEventTriggered.dart';
+import 'DurationPicker.dart';
 
 class TimerRoute extends StatefulWidget {
   final Duration timerDuration;
@@ -25,9 +27,16 @@ class _TimerRoutestate extends State<TimerRoute> {
     startTimer();
   }
 
-  void startTimer() {
+  void startTimer() async{
     _timerNotificationID =
         5; //arbitrary, all related timer notifications will be 5
+
+    final prefs = await SharedPreferences.getInstance();
+    int timerReminderNotification = prefs.getInt("timerReminderInSeconds");
+    if(timerReminderNotification == null){
+      timerReminderNotification = 300; //default to 5 minutes if settings havent been changed
+    }
+
     _timer = Timer.periodic(Duration(seconds: 1), (_timer) {
       setState(() {
         _currentTimeLeft -= Duration(seconds: 1);
@@ -40,41 +49,10 @@ class _TimerRoutestate extends State<TimerRoute> {
                 builder: (context) => EmergencyEventTrigger(false)));
         _timer.cancel();
       }
-      if (_currentTimeLeft.inSeconds == (5 * 60) &&
-          widget.timerDuration.inMinutes >= 6) {
-        //maybe add functionality to set when reminder goes off in settings route
-        NotificationService().showNotifications(_timerNotificationID);
+      if (_currentTimeLeft.inSeconds == timerReminderNotification && timerReminderNotification != 0) {
+        NotificationService().showNotifications(_timerNotificationID, Duration(seconds: timerReminderNotification));
       }
     });
-  }
-
-  String _timerDurationFormat(Duration duration) {
-    //deals the formatting of the time remaining
-    String retval = "";
-    if (duration.inHours != 0) {
-      retval += "${duration.inHours.toString()}:";
-    }
-    if (duration.inMinutes != 0 || duration.inHours != 0) {
-      int remainder = duration.inMinutes.remainder(60);
-      if (remainder == 0) {
-        retval += "00:";
-      } else if (remainder < 10 && duration.inHours != 0) {
-        retval += "0${duration.inMinutes.remainder(60)}:";
-      } else {
-        retval += "${duration.inMinutes.remainder(60)}:";
-      }
-    }
-    int remainder = duration.inSeconds.remainder(60);
-    if (remainder == 0 && (duration.inMinutes != 0 || duration.inHours != 0)) {
-      retval += "00";
-    } else if (remainder < 10 &&
-        (duration.inMinutes != 0 || duration.inHours != 0)) {
-      retval += "0${duration.inSeconds.remainder(60)}";
-    } else {
-      retval += "${duration.inSeconds.remainder(60)}";
-    }
-
-    return retval;
   }
 
   @override
@@ -105,7 +83,7 @@ class _TimerRoutestate extends State<TimerRoute> {
                     padding: EdgeInsets.all(15),
                     child: Text(
                       "Check In",
-                      style: Theme.of(context).textTheme.headline5,
+                      style: TextStyle(fontSize: 24, fontWeight: FontWeight.normal, letterSpacing: 0.0),
                     ),
                   )),
             )
@@ -126,7 +104,7 @@ class _TimerRoutestate extends State<TimerRoute> {
         ),),),
         Center(
           child: Text(
-            "${_timerDurationFormat(_currentTimeLeft)}",
+            "${timerDurationFormat(_currentTimeLeft)}",
             style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold),
           ),
         ),
