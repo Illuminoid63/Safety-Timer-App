@@ -102,6 +102,7 @@ class _DashboardState extends State<Dashboard> {
 
                 //im thinking gps granularity maybe displayed to the user as data usage so its easier for them to understand
                   //this would be a slider between low medium and high with high gps usage having high granularity
+                //maybe a way to manage emergency contacts
                 //setting to toggle between clear gps cache on cancel vs on new event
                   //store previous gps points between emergency events
                 //also delete account with alert dialog/box making sure they want to delete
