@@ -280,7 +280,7 @@ class _DashboardState extends State<Dashboard> {
                                                                           index]
                                                                       .nickName)));
                                                     },
-                                                    child: Text("GPS Data"))),
+                                                    child: Text("See Location"))),
                                           ],
                                         )
                                       ],

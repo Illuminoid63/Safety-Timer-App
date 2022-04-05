@@ -110,7 +110,6 @@ class _GPSPointListState extends State<GPSPointList> {
               centerTitle: true,
               bottom: TabBar(
                 tabs: [Tab(text: "GPS Point List"), Tab(text: "Map")],
-                onTap: (index){print("tabbed to index $index");},
               ),
             ),
             body: TabBarView(
