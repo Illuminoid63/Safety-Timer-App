@@ -8,3 +8,4 @@ This app is currently a work in progress, so screenshots of the final version an
 
 Also, if you plan on using this code, it will not work for you out of the gate because I have excluded some files that contain sensistive data, such as a google-services.json file that is used to connect the app to a firebase database, you will have to create your own database and add said file into android/app directory. This also applies to a SensitiveGlobals.dart file that contains other sensitive data such as a google maps API key.
 
+Addendum: AndroidManifest.xml has also been removed because it now contains and API key.
