@@ -10,5 +10,38 @@ Also, if you plan on using this code, it will not work for you out of the gate b
 
 Addendum: AndroidManifest.xml has also been removed because it now contains an API key.
 
-# Login screen shown when you first open the app.
-![](https://github.com/Illuminoid63/Safety-Timer-App/blob/main/README_Assets/Login.png)
+<br>
+
+## Login screen shown when you first open the app.
+
+<img src="README_Assets/Login.png" alt="drawing" width="250"/>
+
+<br>
+
+## Default dashboard after logging in.
+
+<img src="README_Assets/DefaultDashboard.png" alt="drawing" width="250"/>
+
+<br>
+
+## This is the timer duration picker.
+
+<img src="README_Assets/TimerPicker.png" alt="drawing" width="250"/>
+
+<br>
+
+## Timer count down.
+
+<img src="README_Assets/timer.gif" alt="drawing" width="250"/>
+
+<br>
+
+## Emergency event triggered, emergency contacts notified and GPS uploading.
+
+<img src="README_Assets/uploading.gif" alt="drawing" width="250"/>
+
+<br>
+
+## Map view of an emergency dependee uploading GPS points.
+
+<img src="README_Assets/map.gif" alt="drawing" width="250"/>
