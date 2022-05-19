@@ -11,4 +11,4 @@ Also, if you plan on using this code, it will not work for you out of the gate b
 Addendum: AndroidManifest.xml has also been removed because it now contains an API key.
 
 # Login screen shown when you first open the app.
-![](https://github.com/Your_Repository_Name/Your_GIF_Name.gif](https://github.com/Illuminoid63/Safety-Timer-App/blob/main/README_Assets/Login.png))
+![](https://github.com/Your_Repository_Name/Your_GIF_Name.gif](https://github.com/Illuminoid63/Safety-Timer-App/blob/main/README_Assets/Login.png)
